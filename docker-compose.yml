@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.20.1
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
+    expose:
+      - 9090
+  grafana:
+    image: grafana/grafana:7.1.5
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes: 
+      - redis-cache:/data
+  api:
+    container_name: api
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      - PORT=8080
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    expose:
+      - '8080'
+    links:
+      - redis
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
+    depends_on:
+      - redis
+    command: npm run start
+volumes:
+  redis-cache:
+    driver: local
+  prometheus_data: {}
+  grafana_data: {}
