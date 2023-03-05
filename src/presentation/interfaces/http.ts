@@ -2,6 +2,9 @@
 export interface HttpRequest {
     body: any;
     params: any;
+    method: any;
+    route: any;
+    statusCode?: any;
 }
 
 

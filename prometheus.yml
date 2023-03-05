@@ -1,6 +1,6 @@
 global:
   scrape_interval: 5s
 scrape_configs:
-  - job_name: "node-application-monitoring-app"
+  - job_name: "monitoring-article"
     static_configs:
       - targets: ["api:8080"]
